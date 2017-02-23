@@ -11,8 +11,12 @@ openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 ```bash
 # encrypt with a password:
 ./bashcrypto -e -i test.txt -o test.txt.enc
+# encrypt all files in a folder
+./bashcrypto -e -i dir -o enc
 # encrypt with your public key:
 ./bashcrypto -e -p public.pem -i test.txt -o ultrasecret.dat
+# encrypt all files in a folder
+./bashcrypto -e -p public.pem -i dir -o ultrasecret.dat
 ```
 ### Decrypt
 ```bash
