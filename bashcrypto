@@ -9,6 +9,8 @@ red='\e[1;31m'
 yellow='\e[1;33m'
 BlueF='\e[1;34m'
 
+CIPHERMODE="aes-256-cbc"
+
 function usage() {
 
     echo -e $cyan
@@ -42,11 +44,11 @@ function encrypt() {
 
     else
         if [[ -f $INPUT_FILE ]]; then
-            openssl aes-256-ecb -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
+            openssl $CIPHERMODE -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-                openssl aes-256-ecb -a -salt -in $file -out $file.$OUTPUT_FILE
+                openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
             done
         fi
     fi
@@ -77,11 +79,11 @@ function decrypt() {
         fi
     else
         if [[ -f $INPUT_FILE ]]; then
-            openssl aes-256-ecb -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+            openssl $CIPHERMODE -d -a -in $INPUT_FILE -out $OUTPUT_FILE
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-                openssl aes-256-ecb -d -a -in $file -out $file.$OUTPUT_FILE
+                openssl $CIPHERMODE -d -a -in $file -out $file.$OUTPUT_FILE
             done
         fi
 
