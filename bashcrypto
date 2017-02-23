@@ -31,7 +31,7 @@ function encrypt() {
 	if [[ $DEMODE -eq 1 ]]; then
 		openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $INPUT_FILE -out $OUTPUT_FILE
 	else
-		openssl aes-256-ecb -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
+		openssl aes-256-cbc -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
 	fi
 	echo -e $okegreen 
 	echo "[+] Done!"
@@ -52,7 +52,7 @@ function decrypt() {
 	if [[ $DEMODE -eq 1 ]]; then
 		openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
 	else
-		openssl aes-256-ecb -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+		openssl aes-256-cbc -d -a -in $INPUT_FILE -out $OUTPUT_FILE
 	fi
 }
 
