@@ -54,7 +54,7 @@ function encrypt() {
     echo "[+] Done!"
     echo "[?] delete plain file? (y/n)"
     read answer
-    if [[ $answer -eq "y" ]]; then
+    if [[ $answer == "y" ]]; then
         rm $INPUT_FILE
         echo "[!] deleted inputfile!"
     fi
