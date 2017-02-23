@@ -13,7 +13,9 @@ function usage() {
 
     echo -e $cyan
     echo "usage: $0 -e -i test.txt -o test.txt.enc"
+    echo "usage: $0 -e -i dir -o enc"
     echo "usage: $0 -e -p /path/to/pubkey -i test.txt -o test.txt.enc"
+    echo "usage: $0 -e -p /path/to/pubkey -i dir -o .enc"
     echo "usage: $0 -d -i test.txt.enc -o test.txt"
     echo "usage: $0 -d -p /path/to/privatekey -i test.txt.enc -o test.txt"
     echo ""
