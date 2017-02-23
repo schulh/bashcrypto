@@ -77,9 +77,19 @@ while getopts "edi:o:p:Hh" opt;do
 
     i)
         INPUT_FILE=$OPTARG
-        if [[ ! -f $INPUT_FILE || ! -d $INPUT_FILE ]]; then
-            echo "inputfile not found!"
-            exit -1
+        if [[ -f $INPUT_FILE ]] ; then
+            echo -e $okgreen
+            echo "[+] inputfile found!"
+            echo ""
+        elif [[ -d $INPUT_FILE ]] ; then
+            echo -e $okgreen
+            echo "[+] directory found!"
+            echo ""
+        else
+            echo -e $red
+            echo "[!] INPUT NOT FOUND!"
+            exit 1
+            echo ""
         fi
         ;;
     e)
