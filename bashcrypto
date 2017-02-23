@@ -11,90 +11,105 @@ BlueF='\e[1;34m'
 
 function usage() {
 
-	echo -e $cyan
-	echo "usage: $0 -e -i test.txt -o test.txt.enc"
-	echo "usage: $0 -e -p /path/to/pubkey -i test.txt -o test.txt.enc"
-	echo "usage: $0 -d -i test.txt.enc -o test.txt"
-	echo "usage: $0 -d -p /path/to/privatekey -i test.txt.enc -o test.txt"
-	echo -e ""
+    echo -e $cyan
+    echo "usage: $0 -e -i test.txt -o test.txt.enc"
+    echo "usage: $0 -e -p /path/to/pubkey -i test.txt -o test.txt.enc"
+    echo "usage: $0 -d -i test.txt.enc -o test.txt"
+    echo "usage: $0 -d -p /path/to/privatekey -i test.txt.enc -o test.txt"
+    echo ""
 }
 
 function encrypt() {
-	echo -e $okegreen
-	echo "[+] ENCRYPT"
-	echo "[+] INPUT:  "$INPUT_FILE
-	echo "[+] OUTPUT: "$OUTPUT_FILE
-	echo ""
-	echo -e $red
-	echo "[!] Your file will be encypted now!"
-	echo ""
-	if [[ $DEMODE -eq 1 ]]; then
-		openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $INPUT_FILE -out $OUTPUT_FILE
-	else
-		openssl aes-256-cbc -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
-	fi
-	echo -e $okegreen 
-	echo "[+] Done!"
-	echo "[?] delete plain file? (y/n)"
-	read answer
-	if [[ $answer -eq "y" ]]; then
-		rm $INPUT_FILE
-		echo "[!] deleted inputfile!"
-	fi
-	echo ""
+    echo -e $okegreen
+    echo "[+] ENCRYPT"
+    echo "[+] INPUT:  "$INPUT_FILE
+    echo "[+] OUTPUT: "$OUTPUT_FILE
+    echo ""
+    echo -e $red
+    echo "[!] Your file will be encypted now!"
+    echo ""
+    if [[ $DEMODE -eq 1 ]]; then
+        if [[ -f $INPUT_FILE ]]; then
+            openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $INPUT_FILE -out $OUTPUT_FILE
+        elif [[ -d $INPUT_FILE ]]; then
+            DIR=$INPUT_FILE/*
+            for file in $DIR; do
+                openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $file -out $file.$OUTPUT_FILE
+            done
+        fi
+
+    else
+        if [[ -f $INPUT_FILE ]]; then
+            openssl aes-256-ecb -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
+        elif [[ -d $INPUT_FILE ]]; then
+            DIR=$INPUT_FILE/*
+            for file in $DIR; do
+                openssl aes-256-ecb -a -salt -in $file -out $file.$OUTPUT_FILE
+            done
+        fi
+    fi
+    echo -e $okegreen
+    echo "[+] Done!"
+    echo "[?] delete plain file? (y/n)"
+    read answer
+    if [[ $answer -eq "y" ]]; then
+        rm $INPUT_FILE
+        echo "[!] deleted inputfile!"
+    fi
+    echo ""
 }
 
 function decrypt() {
-	echo -e $okegreen
-	echo "[+] DECRYPT"
-	echo "[+] INPUT:  "$INPUT_FILE
-	echo "[+] OUTPUT: "$OUTPUT_FILE
-	if [[ $DEMODE -eq 1 ]]; then
-		openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
-	else
-		openssl aes-256-cbc -d -a -in $INPUT_FILE -out $OUTPUT_FILE
-	fi
+    echo -e $okegreen
+    echo "[+] DECRYPT"
+    echo "[+] INPUT:  "$INPUT_FILE
+    echo "[+] OUTPUT: "$OUTPUT_FILE
+    if [[ $DEMODE -eq 1 ]]; then
+        openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
+    else
+        openssl aes-256-ecb -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+    fi
 }
 
 
 while getopts "edi:o:p:Hh" opt;do
     case $opt in
-	
-        i)	
-            	INPUT_FILE=$OPTARG
-		if [[ ! -f $INPUT_FILE ]]; then
-			echo "inputfile not found!"
-			exit -1
-		fi
-		;;
-	e)
-		MODE=1;;
-	d)
-		MODE=2;;	
-	o)
-		OUTPUT_FILE=$OPTARG;;
-	p)
-		KEYFILE=$OPTARG
-		DEMODE=1
-		if [[ ! -f $KEYFILE ]]; then
-			echo -e $red
-			echo "Keyfile not found"
-			echo ""
-			exit -1
-		fi;;
+
+    i)
+        INPUT_FILE=$OPTARG
+        if [[ ! -f $INPUT_FILE || ! -d $INPUT_FILE ]]; then
+            echo "inputfile not found!"
+            exit -1
+        fi
+        ;;
+    e)
+        MODE=1;;
+    d)
+        MODE=2;;
+    o)
+        OUTPUT_FILE=$OPTARG;;
+    p)
+        KEYFILE=$OPTARG
+        DEMODE=1
+        if [[ ! -f $KEYFILE ]]; then
+            echo -e $red
+            echo "Keyfile not found"
+            echo ""
+            exit -1
+        fi;;
         H|h)
-            	usage
-		exit -1;;
+                usage
+        exit -1;;
         \?)
-            	usage
-		exit -1;;
+                usage
+        exit -1;;
    esac
 done
 
 if [[ $MODE -eq 1 ]]; then
-	encrypt
+    encrypt
 elif [[ $MODE -eq 2 ]]; then
-	decrypt
+    decrypt
 else
-	echo -e $red "FAILURE"
+    echo -e $red "FAILURE"
 fi
