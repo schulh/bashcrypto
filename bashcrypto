@@ -41,7 +41,6 @@ function encrypt() {
                 openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $file -out $file.$OUTPUT_FILE
             done
         fi
-
     else
         if [[ -f $INPUT_FILE ]]; then
             openssl $CIPHERMODE -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
@@ -79,37 +78,36 @@ function decrypt() {
                 openssl $CIPHERMODE -d -a -in $file -out $file.$OUTPUT_FILE
             done
         fi
-
-
     fi
 }
 
 
 
-while getopts "edi:o:p:Hh" opt;do
+while getopts "tedi:o:p:Hh" opt;do
     case $opt in
 
     i)
         INPUT_FILE=$OPTARG
         if [[ -f $INPUT_FILE ]] ; then
-		echo -e $okgreen
-            	echo "[+] inputfile found!"
-            	echo ""
+			echo -e $okgreen
+       		echo "[+] inputfile found!"
+            echo ""
         elif [[ -d $INPUT_FILE ]] ; then
-
         	echo -e $okgreen
-            	echo "[+] directory found!"
-            	echo ""
-		DIRMODE=1
+            echo "[+] directory found!"
+            echo ""
+			DIRMODE=1
         else
-            	echo -e $red
-            	echo "[!] INPUT NOT FOUND!"
-            	exit 1
-            	echo ""
+			echo -e $red
+            echo "[!] INPUT NOT FOUND!"
+            exit 1
+            echo ""
         fi
         ;;
     e)
         MODE=1;;
+	t)
+		TARMODE=1;;
     d)
         MODE=2;;
     o)
