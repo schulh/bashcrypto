@@ -67,11 +67,28 @@ function decrypt() {
     echo "[+] INPUT:  "$INPUT_FILE
     echo "[+] OUTPUT: "$OUTPUT_FILE
     if [[ $DEMODE -eq 1 ]]; then
-        openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
+        if [[ -f $INPUT_FILE ]]; then
+            openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
+        elif [[ -d $INPUT_FILE ]]; then
+            DIR=$INPUT_FILE/*
+            for file in $DIR; do
+                openssl rsautl -decrypt -inkey $KEYFILE -in $file -out $file.$OUTPUT_FILE
+            done
+        fi
     else
-        openssl aes-256-ecb -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+        if [[ -f $INPUT_FILE ]]; then
+            openssl aes-256-ecb -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+        elif [[ -d $INPUT_FILE ]]; then
+            DIR=$INPUT_FILE/*
+            for file in $DIR; do
+                openssl aes-256-ecb -d -a -in $file -out $file.$OUTPUT_FILE
+            done
+        fi
+
+
     fi
 }
+
 
 
 while getopts "edi:o:p:Hh" opt;do
