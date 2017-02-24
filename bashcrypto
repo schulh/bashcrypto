@@ -45,30 +45,30 @@ function encrypt() {
     if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
         	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE
-			if [[ $SHA == 1 ]]; then
-				echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+			if [[ $SHASUM == 1 ]]; then
+				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
 				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
-				if [[ $SHA == 1 ]]; then
-					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				if [[ $SHASUM == 1 ]]; then
+					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
             done
         fi
     else
         if [[ -f $INPUT_FILE ]]; then
             openssl $CIPHERMODE -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
-				if [[ $SHA == 1 ]]; then
-					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				if [[ $SHASUM == 1 ]]; then
+					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
-				if [[ $SHA == 1 ]]; then
-					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				if [[ $SHASUM == 1 ]]; then
+					echo $($SHA $OUTPUT_FILE) > shasum.$file.$OUTPUT_FILE.txt
 				fi
             done
         fi
