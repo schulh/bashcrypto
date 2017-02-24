@@ -34,11 +34,11 @@ function encrypt() {
     echo ""
     if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
-            openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $INPUT_FILE -out $OUTPUT_FILE
+        	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-                openssl rsautl -encrypt -inkey $KEYFILE -pubin -in $file -out $file.$OUTPUT_FILE
+		openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
             done
         fi
     else
@@ -62,11 +62,11 @@ function decrypt() {
     echo "[+] OUTPUT: "$OUTPUT_FILE
     if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
-            openssl rsautl -decrypt -inkey $KEYFILE -in $INPUT_FILE -out $OUTPUT_FILE
+	     openssl smime -decrypt -in $INPUT_FILE -binary -inform DEM -inkey $KEYFILE -out $OUTPUT_FILE
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-                openssl rsautl -decrypt -inkey $KEYFILE -in $file -out $file.$OUTPUT_FILE
+		openssl smime -decrypt -in $file -binary -inform DEM -inkey $KEYFILE -out $file.$OUTPUT_FILE
             done
         fi
     else
