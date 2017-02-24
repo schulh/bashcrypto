@@ -11,7 +11,7 @@ BlueF='\e[1;34m'
 
 CIPHERMODE="aes-256-cbc"
 SHA='sha256sum'
-$TARMODE = 0
+$TARMODE=0
 
 function usage() {
 
