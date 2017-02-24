@@ -2,7 +2,9 @@
 ## Usage
 ### Create public/private key
 ```bash
-# Create private key
+# Create public/private key
+openssl req -x509 -nodes -newkey rsa:4096 -keyout privatekey.pem -out publickey.pem
+# Create public/private key with password protection
 openssl req -x509 -nodes -newkey rsa:4096 -keyout privatekey.pem -out publickey.pem
 ```
 ### Encrypt
