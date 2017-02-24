@@ -11,17 +11,19 @@ BlueF='\e[1;34m'
 
 CIPHERMODE="aes-256-cbc"
 SHA='sha256sum'
+$TARMODE = 0
 
 function usage() {
 
     echo -e $cyan
-	echo "Usage: bashcrypt [OPTION] -i INPUT -o OUTPUT"
+	echo "Usage: ./bashcrypto [OPTION] -i INPUT -o OUTPUT"
 	echo "-p	use public/privatekey for encryption/decryption"
 	echo "-e	encrypt"
 	echo "-d	decrypt"
 	echo "-i	input"
 	echo "-o	output"
 	echo "-s	create shasum"
+	echo "-t	directory will be archived"
 	echo "-h	help message"
 	echo "Exampels:"
 	echo "./bashcrypto -e -s -p publickey.pem -i secretfile.txt -o foofile"
@@ -42,13 +44,15 @@ function encrypt() {
     echo -e $red
     echo "[!] Your file will be encypted now!"
     echo ""
-    if [[ $DEMODE -eq 1 ]]; then
+    # If key is given, use it
+	if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
         	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE
 			if [[ $SHASUM == 1 ]]; then
 				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
-        elif [[ -d $INPUT_FILE ]]; then
+		# If input is a directory and 'tarmode' is set to 0, encrypt every file in it
+        elif [[ -d $INPUT_FILE && $TARMODE == 0 ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
 				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
@@ -56,14 +60,22 @@ function encrypt() {
 					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
             done
-        fi
+		# If input is a directory and 'tarmode' is set to 1, create tar.gz and encrypt it
+        elif [[ -d $INPUT_FILE && $TARMODE == 1 ]]; then
+			tar -czf $OUTPUT_FILE.tar.gz $INPUT_FILE
+        	openssl smime -encrypt -binary -aes-256-cbc -in $OUTPUT_FILE.tar.gz -out $OUTPUT_FILE -outform DER $KEYFILE
+			if [[ $SHASUM == 1 ]]; then
+				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+			fi
+			rm $OUTPUT_FILE.tar.gz
+		fi
     else
         if [[ -f $INPUT_FILE ]]; then
             openssl $CIPHERMODE -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
 				if [[ $SHASUM == 1 ]]; then
 					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
-        elif [[ -d $INPUT_FILE ]]; then
+        elif [[ -d $INPUT_FILE && $TARMODE == 0 ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
@@ -71,7 +83,15 @@ function encrypt() {
 					echo $($SHA $OUTPUT_FILE) > shasum.$file.$OUTPUT_FILE.txt
 				fi
             done
-        fi
+		# If input is a directory and 'tarmode' is set to 1, create tar.gz and encrypt it
+        elif [[ -d $INPUT_FILE && $TARMODE == 1 ]]; then
+			tar -czf $OUTPUT_FILE.tar.gz $INPUT_FILE
+            openssl $CIPHERMODE -a -salt -in $OUTPUT_FILE.tar.gz -out $OUTPUT_FILE
+			if [[ $SHASUM == 1 ]]; then
+				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+			fi
+			rm $OUTPUT_FILE.tar.gz
+		fi
     fi
     echo -e $okegreen
     echo "[+] Done!"
@@ -102,7 +122,6 @@ function decrypt() {
         fi
     fi
 }
-
 
 
 while getopts "stedi:o:p:Hh" opt;do
@@ -153,6 +172,8 @@ while getopts "stedi:o:p:Hh" opt;do
         exit -1;;
    esac
 done
+
+
 
 if [[ $MODE -eq 1 ]]; then
     encrypt
