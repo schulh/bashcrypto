@@ -11,7 +11,8 @@ BlueF='\e[1;34m'
 
 CIPHERMODE="aes-256-cbc"
 SHA='sha256sum'
-$TARMODE = 0
+
+
 
 function usage() {
 
@@ -52,7 +53,7 @@ function encrypt() {
 				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
 		# If input is a directory and 'tarmode' is set to 0, encrypt every file in it
-        elif [[ -d $INPUT_FILE && $TARMODE == 0 ]]; then
+        elif [[ -d $INPUT_FILE && -z $TARMODE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
 				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
@@ -75,7 +76,7 @@ function encrypt() {
 				if [[ $SHASUM == 1 ]]; then
 					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
-        elif [[ -d $INPUT_FILE && $TARMODE == 0 ]]; then
+        elif [[ -d $INPUT_FILE && -z $TARMODE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
