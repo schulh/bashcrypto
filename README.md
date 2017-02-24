@@ -3,9 +3,7 @@
 ### Create public/private key
 ```bash
 # Create private key
-openssl genrsa -aes256 -out private.pem 4096
-# generate public key
-openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+openssl req -x509 -nodes -newkey rsa:4096 -keyout privatekey.pem -out publickey.pem
 ```
 ### Encrypt
 ```bash
