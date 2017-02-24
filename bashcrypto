@@ -10,18 +10,28 @@ yellow='\e[1;33m'
 BlueF='\e[1;34m'
 
 CIPHERMODE="aes-256-cbc"
+SHA='sha256sum'
 
 function usage() {
 
     echo -e $cyan
-    echo "usage: $0 -e -i test.txt -o test.txt.enc"
-    echo "usage: $0 -e -i dir -o enc"
-    echo "usage: $0 -e -p /path/to/pubkey -i test.txt -o test.txt.enc"
-    echo "usage: $0 -e -p /path/to/pubkey -i dir -o .enc"
-    echo "usage: $0 -d -i test.txt.enc -o test.txt"
-    echo "usage: $0 -d -p /path/to/privatekey -i test.txt.enc -o test.txt"
+	echo "Usage: bashcrypt [OPTION] -i INPUT -o OUTPUT"
+	echo "-p	use public/privatekey for encryption/decryption"
+	echo "-e	encrypt"
+	echo "-d	decrypt"
+	echo "-i	input"
+	echo "-o	output"
+	echo "-s	create shasum"
+	echo "-h	help message"
+	echo "Exampels:"
+	echo "./bashcrypto -e -s -p publickey.pem -i secretfile.txt -o foofile"
+	echo "./bashcrypto -e -i secretfile.txt -o foofile"
+	echo "./bashcrypto -d -p privatekey.pem -i foofile -o secretfile.txt"
+	echo "./bashcrypto -d -i foofile -o secretfile.txt"
     echo ""
 }
+
+
 
 function encrypt() {
     echo -e $okegreen
@@ -35,19 +45,31 @@ function encrypt() {
     if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
         	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE
+			if [[ $SHA == 1 ]]; then
+				echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+			fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-		openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
+				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
+				if [[ $SHA == 1 ]]; then
+					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				fi
             done
         fi
     else
         if [[ -f $INPUT_FILE ]]; then
             openssl $CIPHERMODE -a -salt -in $INPUT_FILE -out $OUTPUT_FILE
+				if [[ $SHA == 1 ]]; then
+					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
+				if [[ $SHA == 1 ]]; then
+					echo $($HASH $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
+				fi
             done
         fi
     fi
@@ -66,7 +88,7 @@ function decrypt() {
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-		openssl smime -decrypt -in $file -binary -inform DEM -inkey $KEYFILE -out $file.$OUTPUT_FILE
+				openssl smime -decrypt -in $file -binary -inform DEM -inkey $KEYFILE -out $file.$OUTPUT_FILE
             done
         fi
     else
@@ -83,7 +105,7 @@ function decrypt() {
 
 
 
-while getopts "tedi:o:p:Hh" opt;do
+while getopts "stedi:o:p:Hh" opt;do
     case $opt in
 
     i)
@@ -112,6 +134,8 @@ while getopts "tedi:o:p:Hh" opt;do
         MODE=2;;
     o)
         OUTPUT_FILE=$OPTARG;;
+	s)
+		SHASUM=1;;
     p)
         KEYFILE=$OPTARG
         DEMODE=1
