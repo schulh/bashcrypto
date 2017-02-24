@@ -10,6 +10,7 @@ Usage: bashcrypt [OPTION] -i INPUT -o OUTPUT
 -i	input
 -o	output
 -s	create shasum
+-t  tarmode
 -h	help message
 ```
 ### Create public/private key
