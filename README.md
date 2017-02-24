@@ -1,5 +1,17 @@
 # bashcrypto
 ## Usage
+
+### Options
+```bash
+Usage: bashcrypt [OPTION] -i INPUT -o OUTPUT
+-p	use public/privatekey for encryption/decryption
+-e	encrypt
+-d	decrypt
+-i	input
+-o	output
+-s	create shasum
+-h	help message
+```
 ### Create public/private key
 ```bash
 # Create public/private key
