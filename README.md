@@ -25,3 +25,8 @@ openssl req -x509 -newkey rsa:4096 -keyout privatekey.pem -out publickey.pem
 # decrypt with private key:
 ./bashcrypto -d -p private.pem -i ultrasecret.dat -o plain.txt
 ```
+
+## To-Do
+- create shasum
+- tar
+- ?
