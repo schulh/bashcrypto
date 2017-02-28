@@ -40,5 +40,4 @@ openssl req -x509 -newkey rsa:4096 -keyout privatekey.pem -out publickey.pem
 ```
 
 ## To-Do
-- tar
-- fix decrypt
+- ?
