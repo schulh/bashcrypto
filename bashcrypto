@@ -106,19 +106,31 @@ function decrypt() {
     if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
 	     openssl smime -decrypt -in $INPUT_FILE -binary -inform DEM -inkey $KEYFILE -out $OUTPUT_FILE
+			if [[ $TARMODE == 1 ]]; then
+				tar -xvf $OUTPUT_FILE
+			fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
 				openssl smime -decrypt -in $file -binary -inform DEM -inkey $KEYFILE -out $file.$OUTPUT_FILE
+				if [[ $TARMODE == 1 ]]; then
+					tar -xvf $OUTPUT_FILE
+				fi
             done
         fi
     else
         if [[ -f $INPUT_FILE ]]; then
             openssl $CIPHERMODE -d -a -in $INPUT_FILE -out $OUTPUT_FILE
+				if [[ $TARMODE == 1 ]]; then
+					tar -xvf $OUTPUT_FILE
+				fi
         elif [[ -d $INPUT_FILE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -d -a -in $file -out $file.$OUTPUT_FILE
+				if [[ $TARMODE == 1 ]]; then
+					tar -xvf $OUTPUT_FILE
+				fi
             done
         fi
     fi
@@ -165,10 +177,10 @@ while getopts "stedi:o:p:Hh" opt;do
             echo ""
             exit -1
         fi;;
-        H|h)
+	H|h)
                 usage
         exit -1;;
-        \?)
+	\?)
                 usage
         exit -1;;
    esac
