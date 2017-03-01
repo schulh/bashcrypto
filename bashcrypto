@@ -11,12 +11,22 @@ BlueF='\e[1;34m'
 
 CIPHERMODE="aes-256-cbc"
 SHA='sha256sum'
-<<<<<<< HEAD
+#$TARMODE=0
 
-
-=======
-$TARMODE=0
->>>>>>> c583b1c81bd4e326fe8192dfacd2476c1197eb88
+ spinner() {
+    #local pid=$$
+    local process='openssl'
+    local delay=0.50
+    local spinstr='/-\|'
+	while [ "$(ps a | awk '{print $5}' | grep $process)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "${spinstr}"
+        local spinstr=${temp}${spinstr%"$temp}"}
+        sleep ${delay}
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
 
 function usage() {
 
@@ -48,11 +58,12 @@ function encrypt() {
     echo ""
     echo -e $red
     echo "[!] Your file will be encypted now!"
+	 
     echo ""
     # If key is given, use it
 	if [[ $DEMODE -eq 1 ]]; then
         if [[ -f $INPUT_FILE ]]; then
-        	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE
+        	openssl smime -encrypt -binary -aes-256-cbc -in $INPUT_FILE -out $OUTPUT_FILE -outform DER $KEYFILE | spinner
 			if [[ $SHASUM == 1 ]]; then
 				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
@@ -60,7 +71,8 @@ function encrypt() {
         elif [[ -d $INPUT_FILE && -z $TARMODE ]]; then
             DIR=$INPUT_FILE/*
             for file in $DIR; do
-				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE
+				openssl smime -encrypt -binary -aes-256-cbc -in $file -out $file.$OUTPUT_FILE -outform DER $KEYFILE | spinner
+				 
 				if [[ $SHASUM == 1 ]]; then
 					echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 				fi
@@ -68,7 +80,8 @@ function encrypt() {
 		# If input is a directory and 'tarmode' is set to 1, create tar.gz and encrypt it
         elif [[ -d $INPUT_FILE && $TARMODE == 1 ]]; then
 			tar -czf $OUTPUT_FILE.tar.gz $INPUT_FILE
-        	openssl smime -encrypt -binary -aes-256-cbc -in $OUTPUT_FILE.tar.gz -out $OUTPUT_FILE -outform DER $KEYFILE
+        	openssl smime -encrypt -binary -aes-256-cbc -in $OUTPUT_FILE.tar.gz -out $OUTPUT_FILE -outform DER $KEYFILE | spinner
+			 
 			if [[ $SHASUM == 1 ]]; then
 				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
@@ -84,6 +97,7 @@ function encrypt() {
             DIR=$INPUT_FILE/*
             for file in $DIR; do
                 openssl $CIPHERMODE -a -salt -in $file -out $file.$OUTPUT_FILE
+				 
 				if [[ $SHASUM == 1 ]]; then
 					echo $($SHA $OUTPUT_FILE) > shasum.$file.$OUTPUT_FILE.txt
 				fi
@@ -92,6 +106,7 @@ function encrypt() {
         elif [[ -d $INPUT_FILE && $TARMODE == 1 ]]; then
 			tar -czf $OUTPUT_FILE.tar.gz $INPUT_FILE
             openssl $CIPHERMODE -a -salt -in $OUTPUT_FILE.tar.gz -out $OUTPUT_FILE
+			 
 			if [[ $SHASUM == 1 ]]; then
 				echo $($SHA $OUTPUT_FILE) > shasum.$OUTPUT_FILE.txt
 			fi
